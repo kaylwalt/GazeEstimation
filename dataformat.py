@@ -70,4 +70,4 @@ def loadinmem():
     time.sleep(20)
 
 if __name__ == "__main__":
-    loadinmem()
+    createNP()

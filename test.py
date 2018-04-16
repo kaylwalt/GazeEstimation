@@ -8,7 +8,9 @@ def main(unused_argv):
   eval_data = np.load(data_folder + "/p00_pics.npy")
   eval_data = np.swapaxes(np.swapaxes(eval_data, 1, 3), 1, 2)
   eval_data = eval_data.astype("float32")
+  eval_data = eval_data[100, :, :]
   eval_labels = np.load(data_folder + "/p00_labs.npy")
+  eval_labels = eval_labels[100,:,:]
   # Create the Estimator
   classifier = tf.estimator.Estimator(
       model_fn=cnn_model_fn, model_dir="./model")

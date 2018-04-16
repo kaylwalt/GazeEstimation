@@ -111,6 +111,7 @@ def cnn_model_fn(features, labels, mode):
   # Calculate Loss (for both TRAIN and EVAL modes)
   loss = tf.losses.absolute_difference(labels, prediction)
 
+  writer = tf.summary.FileWriter("summary", tf.get_default_graph())
   # Configure the Training Op (for TRAIN mode)
   if mode == tf.estimator.ModeKeys.TRAIN:
     optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)

@@ -89,6 +89,7 @@ def normalize_Image(inputImg, target_3D, hR, gc, roiSize, cameraMatrix):
     # matrix to scale the image
     scaleMat = np.array([[1, 0, 0], [0, 1, 0], [0, 0, z_scale]], dtype="float64")
     #first row of rotation matrix of face
+    # this describes the vector sticking out of the x coordinates axis
     hRx = hR[:,0]
     #normalized target vector
     forward = target_3D / distance
