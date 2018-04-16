@@ -78,7 +78,7 @@ def normalize_data(faceModel, cameraMatrix, headpose_hr, headpose_ht, gaze_targe
 
 def normalize_Image(inputImg, target_3D, hR, gc, roiSize, cameraMatrix):
     focal_new = 960
-    distance_new = roiSize[0]* (2.0/3.0)
+    distance_new = 350
     distance = np.sqrt(target_3D.dot(target_3D))
     print("distance: ", distance)
     z_scale = distance_new / distance
@@ -89,7 +89,7 @@ def normalize_Image(inputImg, target_3D, hR, gc, roiSize, cameraMatrix):
     # matrix to scale the image
     scaleMat = np.array([[1, 0, 0], [0, 1, 0], [0, 0, z_scale]], dtype="float64")
     #first row of rotation matrix of face
-    # this describes the vector sticking out of the x coordinates axis
+    # this describes the vector sticking out of the x coordinates axis after being rotated
     hRx = hR[:,0]
     #normalized target vector
     forward = target_3D / distance
