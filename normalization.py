@@ -4,6 +4,7 @@ import scipy.io
 from numpy.linalg import inv
 import math
 import sys
+import time
 
 faceModel = np.load("face_model.npy")
 print("-------faceModel------")
@@ -20,8 +21,8 @@ with open("../MPIIFaceGaze/p00/p00.txt", 'r') as ann:
         for i, item in enumerate(line_array):
             print("index ", i, ": dimension ", i + 1, ": ", item)
 
-        #headpose rotation and translation vectors to convert between
-        #face coordinates and camera coordinates
+        # headpose rotation and translation vectors to convert between
+        # face coordinates and camera coordinates
         headpose_hr = np.array(line_array[15:18], dtype="float64")
         headpose_ht = np.array(line_array[18:21], dtype="float64")
         print("-------headpose_hr and headpose_ht-------")
@@ -66,20 +67,24 @@ def normalize_data(faceModel, cameraMatrix, headpose_hr, headpose_ht, gaze_targe
     oggazevec = oggazevec / np.sqrt(oggazevec.dot(oggazevec))
     print("normalized gaze vector: ", oggazevec)
     print("Theta phi represenation: ", t(oggazevec))
-
+    print("normalized image size: ", norm_img.shape)
+    print("original image size: ", image.shape)
     cv2.imshow("normalized image", norm_img)
 
     cv2.waitKey(0)
 
+    return norm_img
+
 
 def normalize_Image(inputImg, target_3D, hR, gc, roiSize, cameraMatrix):
     focal_new = 960
-    distance_new = 488
+    distance_new = roiSize[0]* (2.0/3.0)
     distance = np.sqrt(target_3D.dot(target_3D))
     print("distance: ", distance)
     z_scale = distance_new / distance
     print("z scale: ", z_scale)
     # camera matrix in normalized space
+
     cam_new = np.array([[focal_new, 0, roiSize[0]/2], [0, focal_new, roiSize[1]/2], [0, 0, 1]], dtype="float64")
     # matrix to scale the image
     scaleMat = np.array([[1, 0, 0], [0, 1, 0], [0, 0, z_scale]], dtype="float64")
@@ -99,13 +104,14 @@ def normalize_Image(inputImg, target_3D, hR, gc, roiSize, cameraMatrix):
     print(down)
     print("----------right-----------")
     print(right)
-    rotMat = np.array([right, down, forward]).T
+    # did not transpose this matrix, even though the matlab code did
+    rotMat = np.array([right, down, forward])
     print("-------rotmat----------")
     print(rotMat)
 
     warpMat = np.matmul( np.matmul(cam_new, scaleMat), np.matmul(rotMat, inv(cameraMatrix)) )
 
-    img_warped = cv2.warpPerspective(inputImg, warpMat, (1000, 1000))
+    img_warped = cv2.warpPerspective(inputImg, warpMat, tuple(roiSize))
 
     # normalizing gaze vector
     cnvMat = np.matmul(scaleMat, rotMat)
@@ -124,4 +130,6 @@ def t(vec):
 
 
 if __name__ == "__main__":
+    start = time.clock()
     normalize_data(faceModel, cameraMatrix, headpose_hr, headpose_ht, gaze_target, face_center, image)
+    print("time to normalize image: ", time.clock() - start)
