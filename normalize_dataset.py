@@ -48,7 +48,7 @@ def normalize_data_set():
 
     for i in range(0,5):
         anno_path = data_folder + "/p1{}/p1{}.txt".format(i, i)
-        print(path)
+        print(anno_path)
         data = []
         labels = []
         with open(anno_path, 'r') as ann:
@@ -119,6 +119,11 @@ def normalize_Image(inputImg, target_3D, hR, gc, roiSize, cameraMatrix):
     warpMat = np.matmul( np.matmul(cam_new, scaleMat), np.matmul(rotMat, inv(cameraMatrix)) )
 
     img_warped = cv2.warpPerspective(inputImg, warpMat, tuple(roiSize))
+
+    img_yuv = cv2.cvtColor(img_warped, cv2.COLOR_RGB2YUV)
+    img_yuv[:,:,0] = cv2.equalizeHist(img_yuv[:,:,0])
+    img_warped = cv2.cvtColor(img_yuv, cv2.COLOR_YUV2RGB)
+
     # normalizing gaze vector
     cnvMat = np.matmul(scaleMat, rotMat)
     gcnew = np.matmul(cnvMat, gc)

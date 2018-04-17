@@ -2,16 +2,15 @@ import os
 import numpy as np
 import time
 import scipy.io
+import cv2
 
-path = "../MPIIGaze/Data/6 points-based face model.mat"
-#f = h5py.File(path, 'r')
-f = scipy.io.loadmat(path)
-cam = scipy.io.loadmat("../MPIIFaceGaze/p00/Calibration/Camera.mat")
-print(cam)
-#print(f)
-#model = f['model']
+data = np.load("../MPIIFaceGaze_kayl_norm/p00_data.npy")
+labels = np.load("../MPIIFaceGaze_kayl_norm/p00_labels.npy")
+print(data.shape)
+print(labels.shape)
 
-#print(model.dtype)
-#print(model.shape)
-
-#np.save("./face_model.npy", model)
+index = 2779
+cv2.imshow("image", data[index,:,:,:])
+print("theta is ", labels[index, 0])
+print("phi is ", labels[index, 1])
+cv2.waitKey(0)
