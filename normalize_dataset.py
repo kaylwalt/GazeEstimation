@@ -86,7 +86,7 @@ def normalize_data(faceModel, cameraMatrix, headpose_hr, headpose_ht, gaze_targe
     faceModel = np.matmul(headpose_hR, faceModel)
     faceModel = np.add(faceModel, np.array([headpose_ht]).T)
 
-    norm_img, gaze, cnvMat = normalize_Image(image, face_center, headpose_hR, gaze_target, [488, 488], cameraMatrix)
+    norm_img, gaze, cnvMat = normalize_Image(image, face_center, headpose_hR, gaze_target, [448, 448], cameraMatrix)
 
     return norm_img, t(gaze / np.sqrt(gaze.dot(gaze)))
 

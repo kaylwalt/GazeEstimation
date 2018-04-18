@@ -60,7 +60,7 @@ def normalize_data(faceModel, cameraMatrix, headpose_hr, headpose_ht, gaze_targe
     print("read out center of face: ", face_center)
     cv2.imshow("image", image)
     # cv2.waitKey(0)
-    norm_img, gaze, cnvMat = normalize_Image(image, face_center, headpose_hR, gaze_target, [488, 488], cameraMatrix)
+    norm_img, gaze, cnvMat = normalize_Image(image, face_center, headpose_hR, gaze_target, [448, 448], cameraMatrix)
     print("original gaze vector: ", np.subtract(gaze_target, face_center))
     print("reverted gaze vector: ", np.matmul(inv(cnvMat), gaze))
     oggazevec = np.subtract(gaze_target, face_center)

@@ -14,11 +14,15 @@ def cnn_model_fn(features, labels, mode):
   # Reshape X to 4-D tensor: [batch_size, width, height, channels]
   input_layer = tf.reshape(features["x"], [-1, 448, 448, 3])
 
+  conv1_filters = 96
+  conv2_filters = 128
+  conv3_filters = 256
+  dense_nodes = 2048
   # Convolutional Layer #1
   # outputs batchx112x112x96
   conv1 = tf.layers.conv2d(
       inputs=input_layer,
-      filters=96,
+      filters=conv1_filters,
       kernel_size=[4, 4],
       strides=[4,4],
       padding="valid",
@@ -32,7 +36,7 @@ def cnn_model_fn(features, labels, mode):
   # outputs
   conv2 = tf.layers.conv2d(
       inputs=pool1,
-      filters=128,
+      filters=conv2_filters,
       kernel_size=[2, 2],
       padding="same",
       activation=tf.nn.relu)
@@ -44,7 +48,7 @@ def cnn_model_fn(features, labels, mode):
   # outputs batchx28x28x256
   conv3 = tf.layers.conv2d(
     inputs=pool2,
-    filters=256,
+    filters=conv3_filters,
     kernel_size=[2,2],
     padding="same",
     activation=tf.nn.relu
@@ -55,14 +59,14 @@ def cnn_model_fn(features, labels, mode):
 
   heat_conv1 = tf.layers.conv2d(
   inputs=pool3,
-  filters=256,
+  filters=conv3_filters,
   kernel_size=[1,1],
   padding="same",
   activation=tf.nn.relu
   )
   heat_conv2 = tf.layers.conv2d(
   inputs=heat_conv1,
-  filters=256,
+  filters=conv3_filters,
   kernel_size=[1,1],
   padding="same",
   activation=tf.nn.relu
@@ -78,22 +82,22 @@ def cnn_model_fn(features, labels, mode):
 
   flat_heat_map = tf.reshape(heat_map, [-1, 14*14])
   #repeats the heat map 256 times
-  flat_heat_map_resized = tf.tile(flat_heat_map, [1, 256])
+  flat_heat_map_resized = tf.tile(flat_heat_map, [1, conv3_filters])
 
   # size batchx14*14*256
-  flat_pool3 = tf.reshape(pool3, [-1, 14*14*256])
+  flat_pool3 = tf.reshape(pool3, [-1, 14*14*conv3_filters])
 
   #because of numpy broadcasting will do component wise multiplication
   #batchx14*14*256 times batchx14*14*256
   flat_weighted_pool3 = tf.multiply(flat_pool3, flat_heat_map_resized)
 
-  dense1 = tf.layers.dense(inputs=flat_weighted_pool3, units=4096, activation=tf.nn.relu)
+  dense1 = tf.layers.dense(inputs=flat_weighted_pool3, units=dense_nodes, activation=tf.nn.relu)
 
   # Add dropout operation; 0.6 probability that element will be kept
   dropout = tf.layers.dropout(
       inputs=dense1, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
 
-  dense2 = tf.layers.dense(inputs=dropout, units=4096, activation=tf.nn.relu)
+  dense2 = tf.layers.dense(inputs=dropout, units=dense_nodes, activation=tf.nn.relu)
 
   # prediction layer
   # Input Tensor Shape: [batch_size, 1024]
@@ -140,45 +144,51 @@ def main(unused_argv):
   #   tensors=tensors_to_log, every_n_iter=50)
 
   # Load training and eval data
-  data_folder = "../MPIIFaceGaze_normalized"
-  train_data = np.load(data_folder + "/p00_pics.npy")
-  train_data = np.swapaxes(np.swapaxes(train_data, 1, 3), 1, 2)
-  train_data = train_data.astype("float32")
-  train_labels = np.load(data_folder + "/p00_labs.npy")
-  # Train the model
+  data_folder = "../MPIIFaceGaze_kayl_norm"
+  # train_data = np.empty([1,448,448,3], dtype="float32")
+  # train_labels = np.empty([1,2], dtype="float32")
+  # # Train the model
+  #
+  # train_input_fn = tf.estimator.inputs.numpy_input_fn(
+  #     x={"x": train_data},
+  #     y=train_labels,
+  #     batch_size=128,
+  #     num_epochs=1,
+  #     shuffle=True)
 
-  train_input_fn = tf.estimator.inputs.numpy_input_fn(
-      x={"x": train_data},
-      y=train_labels,
-      batch_size=64,
-      num_epochs=1,
-      shuffle=True)
-
-  classifier.train(
-    input_fn=train_input_fn,
-    steps=None,
-    hooks=[])#took out logging_hook
-  for i in range(12,15):
+  for i in range(0,15):
       if i < 10:
-          pathp = data_folder + "/p0{}_pics.npy".format(i)
-          pathl = data_folder + "/p0{}_labs.npy".format(i)
+          pathp = data_folder + "/p0{}_data.npy".format(i)
+          pathl = data_folder + "/p0{}_labels.npy".format(i)
           print(pathp)
-          train_data = np.load(pathp)
-          train_data = np.swapaxes(np.swapaxes(train_data, 1, 3), 1, 2)
-          train_data = train_data.astype("float32")
-          train_labels = np.load(pathl)
+          train_data = np.load(pathp).astype("float32") * (1.0/255.0)
+          #train_data = train_data.astype("float32") * (1.0/255.0)
+          train_labels = np.load(pathl).astype("float32")
+          print("train label dtype: {}, train data dtype: {}".format(train_labels.dtype, train_data.dtype))
+          train_input_fn = tf.estimator.inputs.numpy_input_fn(
+              x={"x": train_data},
+              y=train_labels,
+              batch_size=128,
+              num_epochs=1,
+              shuffle=True)
           classifier.train(
             input_fn=train_input_fn,
             steps=None,
             hooks=[])#took out logging_hook
       else:
-          pathp = data_folder + "/p1{}_pics.npy".format(i-10)
-          pathl = data_folder + "/p1{}_labs.npy".format(i-10)
+          pathp = data_folder + "/p1{}_data.npy".format(i-10)
+          pathl = data_folder + "/p1{}_labels.npy".format(i-10)
           print(pathp)
-          train_data = np.load(pathp)
-          train_data = np.swapaxes(np.swapaxes(train_data, 1, 3), 1, 2)
-          train_data = train_data.astype("float32")
-          train_labels = np.load(pathl)
+          train_data = np.load(pathp).astype("float32") * (1.0/255.0)
+          train_labels = np.load(pathl).astype("float32")
+
+          train_input_fn = tf.estimator.inputs.numpy_input_fn(
+              x={"x": train_data},
+              y=train_labels,
+              batch_size=128,
+              num_epochs=1,
+              shuffle=True)
+
           classifier.train(
             input_fn=train_input_fn,
             steps=None,
