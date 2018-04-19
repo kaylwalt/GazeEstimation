@@ -21,7 +21,7 @@ predictor = dlib.shape_predictor(args["shape_predictor"])
 
 # load the input image, resize it, and convert it to grayscale
 image = cv2.imread(args["image"])
-image = imutils.resize(image, width=500)
+#image = imutils.resize(image, width=500)
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 # detect faces in the grayscale image
@@ -38,18 +38,22 @@ for (i, rect) in enumerate(rects):
 
 	# convert dlib's rectangle to a OpenCV-style bounding box
 	# [i.e., (x, y, w, h)], then draw the face bounding box
-	(x, y, w, h) = face_utils.rect_to_bb(rect)
-	cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+	#(x, y, w, h) = face_utils.rect_to_bb(rect)
+	#cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
 	# show the face number
-	cv2.putText(image, "Face #{}".format(i + 1), (x - 10, y - 10),
-		cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+	#cv2.putText(image, "Face #{}".format(i + 1), (x - 10, y - 10),
+	#	cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
 	# loop over the (x, y)-coordinates for the facial landmarks
 	# and draw them on the image
-	for (x, y) in shape:
-		cv2.circle(image, (x, y), 1, (0, 0, 255), -1)
+	for ind, (x, y) in enumerate(shape):
+		if ind not in [36, 39, 42, 45, 48, 54]:
+			print(i)
+			continue
+		cv2.circle(image, (x, y), 3, (0, 255, 0), -1)
 
 # show the output image with the face detections + facial landmarks
 cv2.imshow("Output", image)
+cv2.imwrite("annotated_initil.png", image)
 cv2.waitKey(0)

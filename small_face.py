@@ -7,12 +7,14 @@ import tensorflow as tf
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
-
+model_directory = "../model"
+summary_directory = "../summary"
 def cnn_model_fn(features, labels, mode):
   """Model function for CNN."""
   # Input Layer
   # Reshape X to 4-D tensor: [batch_size, width, height, channels]
-  input_layer = tf.reshape(features["x"], [-1, 448, 448, 3])
+  with tf.variable_scope("Input"):
+      input_layer = tf.reshape(features["x"], [-1, 448, 448, 3], name="Input")
 
   conv1_filters = 64
   conv2_filters = 96
@@ -20,89 +22,98 @@ def cnn_model_fn(features, labels, mode):
   dense_nodes = 2048
   # Convolutional Layer #1
   # outputs batchx112x112x96
-  conv1 = tf.layers.conv2d(
-      inputs=input_layer,
-      filters=conv1_filters,
-      kernel_size=[4, 4],
-      strides=[4,4],
-      padding="valid",
-      activation=tf.nn.relu)
+  with tf.variable_scope("3_Layer_Convolution"):
+      conv1 = tf.layers.conv2d(
+          inputs=input_layer,
+          filters=conv1_filters,
+          kernel_size=[4, 4],
+          strides=[4,4],
+          padding="valid",
+          activation=tf.nn.relu,
+          name="Convolution_1")
 
-  # Pooling Layer #1
-  # outputs batchx56x56x96
-  pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=2)
+      # Pooling Layer #1
+      # outputs batchx56x56x96
+      pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=2, name="Pool_1")
 
-  # Convolutional Layer #2
-  # outputs
-  conv2 = tf.layers.conv2d(
-      inputs=pool1,
-      filters=conv2_filters,
-      kernel_size=[2, 2],
-      padding="same",
-      activation=tf.nn.relu)
+      # Convolutional Layer #2
+      # outputs
+      conv2 = tf.layers.conv2d(
+          inputs=pool1,
+          filters=conv2_filters,
+          kernel_size=[2, 2],
+          padding="same",
+          activation=tf.nn.relu,
+          name="Convolution_2")
 
-  # Pooling Layer #2
-  #outputs batchx28X28X128
-  pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
+      # Pooling Layer #2
+      #outputs batchx28X28X128
+      pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2, name="Pool_2")
 
-  # outputs batchx28x28x256
-  conv3 = tf.layers.conv2d(
-    inputs=pool2,
-    filters=conv3_filters,
-    kernel_size=[2,2],
-    padding="same",
-    activation=tf.nn.relu
-  )
+      # outputs batchx28x28x256
+      conv3 = tf.layers.conv2d(
+        inputs=pool2,
+        filters=conv3_filters,
+        kernel_size=[2,2],
+        padding="same",
+        activation=tf.nn.relu,
+        name="Convolution_3"
+      )
 
-  # outputs batchx14x14x256
-  pool3 = tf.layers.max_pooling2d(inputs=conv3, pool_size=[2,2], strides=2)
+      # outputs batchx14x14x256
+      pool3 = tf.layers.max_pooling2d(inputs=conv3, pool_size=[2,2], strides=2, name="Pool_3")
 
   heat_conv1 = tf.layers.conv2d(
   inputs=pool3,
   filters=conv3_filters,
   kernel_size=[1,1],
   padding="same",
-  activation=tf.nn.relu
+  activation=tf.nn.relu,
+  name="Heat_Conv_1"
   )
   heat_conv2 = tf.layers.conv2d(
   inputs=heat_conv1,
   filters=conv3_filters,
   kernel_size=[1,1],
   padding="same",
-  activation=tf.nn.relu
+  activation=tf.nn.relu,
+  name="Heat_Conv_2"
   )
   # batchx14x14x1
   heat_map = tf.layers.conv2d(
-  inputs=heat_conv1,
+  inputs=heat_conv2,
   filters=1,
   kernel_size=[1,1],
   padding="same",
-  activation=tf.nn.relu
+  activation=tf.nn.relu,
+  name="Heat_Map"
   )
+  with tf.variable_scope("Reshaping"):
+      flat_heat_map = tf.reshape(heat_map, [-1, 14*14])
+      #repeats the heat map 256 times
+      flat_heat_map_resized = tf.tile(flat_heat_map, [1, conv3_filters])
 
-  flat_heat_map = tf.reshape(heat_map, [-1, 14*14])
-  #repeats the heat map 256 times
-  flat_heat_map_resized = tf.tile(flat_heat_map, [1, conv3_filters])
-
-  # size batchx14*14*256
-  flat_pool3 = tf.reshape(pool3, [-1, 14*14*conv3_filters])
+  with tf.variable_scope("Reshaping"):
+      # size batchx14*14*256
+      flat_pool3 = tf.reshape(pool3, [-1, 14*14*conv3_filters])
 
   #because of numpy broadcasting will do component wise multiplication
   #batchx14*14*256 times batchx14*14*256
   flat_weighted_pool3 = tf.multiply(flat_pool3, flat_heat_map_resized)
 
-  dense1 = tf.layers.dense(inputs=flat_weighted_pool3, units=dense_nodes, activation=tf.nn.relu)
+  with tf.variable_scope("Dense_Layer"):
+      dense1 = tf.layers.dense(inputs=flat_weighted_pool3, units=dense_nodes, activation=tf.nn.relu, name="Dense_1")
 
-  # Add dropout operation; 0.6 probability that element will be kept
-  dropout = tf.layers.dropout(
-      inputs=dense1, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
+      # Add dropout operation; 0.6 probability that element will be kept
+      dropout = tf.layers.dropout(
+          inputs=dense1, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN, name="Dropout")
 
-  dense2 = tf.layers.dense(inputs=dropout, units=dense_nodes, activation=tf.nn.relu)
+      dense2 = tf.layers.dense(inputs=dropout, units=dense_nodes, activation=tf.nn.relu, name="Dense_2")
 
   # prediction layer
   # Input Tensor Shape: [batch_size, 1024]
   # Output Tensor Shape: [batch_size, 10]
-  prediction = tf.layers.dense(inputs=dense2, units=2)
+  prediction = tf.layers.dense(inputs=dense2, units=2, name="Prediction")
 
   #CHANGE PREDICTIONS TO NOT BE
   predictions = {
@@ -115,7 +126,7 @@ def cnn_model_fn(features, labels, mode):
   # Calculate Loss (for both TRAIN and EVAL modes)
   loss = tf.losses.absolute_difference(labels, prediction)
 
-  writer = tf.summary.FileWriter("summary", tf.get_default_graph())
+  writer = tf.summary.FileWriter(summary_directory, tf.get_default_graph())
   # Configure the Training Op (for TRAIN mode)
   if mode == tf.estimator.ModeKeys.TRAIN:
     optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
@@ -135,26 +146,11 @@ def cnn_model_fn(features, labels, mode):
 def main(unused_argv):
   # Create the Estimator
   classifier = tf.estimator.Estimator(
-      model_fn=cnn_model_fn, model_dir="./model")
-
-  # Set up logging for predictions
-  # Log the values in the "Softmax" tensor with label "probabilities"
-  #tensors_to_log = {"probabilities": "softmax_tensor"}
-  #logging_hook = tf.train.LoggingTensorHook(
-  #   tensors=tensors_to_log, every_n_iter=50)
+      model_fn=cnn_model_fn, model_dir=model_directory)
 
   # Load training and eval data
   data_folder = "../MPIIFaceGaze_kayl_norm"
-  # train_data = np.empty([1,448,448,3], dtype="float32")
-  # train_labels = np.empty([1,2], dtype="float32")
-  # # Train the model
-  #
-  # train_input_fn = tf.estimator.inputs.numpy_input_fn(
-  #     x={"x": train_data},
-  #     y=train_labels,
-  #     batch_size=128,
-  #     num_epochs=1,
-  #     shuffle=True)
+
   epoch_count = 10
   for x in range(0,epoch_count):
       print(" ")

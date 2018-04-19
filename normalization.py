@@ -70,6 +70,8 @@ def normalize_data(faceModel, cameraMatrix, headpose_hr, headpose_ht, gaze_targe
     print("normalized image size: ", norm_img.shape)
     print("original image size: ", image.shape)
     cv2.imshow("normalized image", norm_img)
+    #cv2.imwrite('initial.png',image)
+    #cv2.imwrite('normalized.png', norm_img)
 
     cv2.waitKey(0)
 
