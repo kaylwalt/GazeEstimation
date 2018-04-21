@@ -7,8 +7,8 @@ import tensorflow as tf
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
-model_directory = "../model3"
-summary_directory = "../summary"
+model_directory = "../model_medium_no_dropout"
+summary_directory = "../summary_medium_no_dropout"
 def cnn_model_fn(features, labels, mode):
   """Model function for CNN."""
   # Input Layer
@@ -16,10 +16,10 @@ def cnn_model_fn(features, labels, mode):
   with tf.variable_scope("Input"):
       input_layer = tf.reshape(features["x"], [-1, 448, 448, 3], name="Input")
 
-  conv1_filters = 64
-  conv2_filters = 96
-  conv3_filters = 128
-  dense_nodes = 2048
+  conv1_filters = 80
+  conv2_filters = 128
+  conv3_filters = 200
+  dense_nodes = 3000
   # Convolutional Layer #1
   # outputs batchx112x112x96
   with tf.variable_scope("3_Layer_Convolution"):
@@ -104,15 +104,10 @@ def cnn_model_fn(features, labels, mode):
   with tf.variable_scope("Dense_Layer"):
       dense1 = tf.layers.dense(inputs=flat_weighted_pool3, units=dense_nodes, activation=tf.nn.relu, name="Dense_1")
 
-      # Add dropout operation; 0.6 probability that element will be kept
-      dropout = tf.layers.dropout(
-          inputs=dense1, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN, name="Dropout")
 
-      dense2 = tf.layers.dense(inputs=dropout, units=dense_nodes, activation=tf.nn.relu, name="Dense_2")
+      dense2 = tf.layers.dense(inputs=dense1, units=dense_nodes, activation=tf.nn.relu, name="Dense_2")
 
   # prediction layer
-  # Input Tensor Shape: [batch_size, 1024]
-  # Output Tensor Shape: [batch_size, 10]
   prediction = tf.layers.dense(inputs=dense2, units=2, name="Prediction")
 
   #CHANGE PREDICTIONS TO NOT BE
@@ -137,7 +132,7 @@ def cnn_model_fn(features, labels, mode):
 
   # Add evaluation metrics (for EVAL mode)
   eval_metric_ops = {
-      "mean squared error": tf.metrics.mean_squared_error(
+      "mean absolute error": tf.metrics.mean_absolute_error(
           labels=labels, predictions=predictions["angles"])}
   return tf.estimator.EstimatorSpec(
       mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
