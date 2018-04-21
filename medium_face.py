@@ -121,7 +121,9 @@ def cnn_model_fn(features, labels, mode):
       "angles": prediction,
   }
   if mode == tf.estimator.ModeKeys.PREDICT:
-    return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
+    return tf.estimator.EstimatorSpec(
+    mode=mode, predictions=predictions,
+    export_outputs={"angles" : tf.estimator.export.PredictOutput(predictions["angles"])})
 
   # Calculate Loss (for both TRAIN and EVAL modes)
   loss = tf.losses.absolute_difference(labels, prediction)
