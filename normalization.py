@@ -57,6 +57,9 @@ def normalize_data(faceModel, cameraMatrix, headpose_hr, headpose_ht, gaze_targe
     print("--------new face model----------")
     print(faceModel)
     print("calculated center of face: ", faceModel.mean(axis=1))
+    if face_center is None:
+        face_center = faceModel.mean(axis=1)
+        print(face_center.shape)
     print("read out center of face: ", face_center)
     cv2.imshow("image", image)
     # cv2.waitKey(0)

@@ -111,7 +111,7 @@ def normalize_Image(inputImg, target_3D, hR, gc, roiSize, cameraMatrix):
     scaleMat = np.array([[1, 0, 0], [0, 1, 0], [0, 0, z_scale]], dtype="float32")
     #first row of rotation matrix of face
     # this describes the vector sticking out of the x coordinates axis after being rotated
-    hRx = hR[:,0]
+    hRx = hR[:,0] * -1
     #normalized target vector
     forward = (target_3D / distance)
     # taking an orthogonal unit vector to forward and the x part of rotation matrix
@@ -119,7 +119,7 @@ def normalize_Image(inputImg, target_3D, hR, gc, roiSize, cameraMatrix):
     down = down / np.sqrt(down.dot(down))
     # taking orthogonal unit vector orthogonal to  forward and down
     right = np.cross(down, forward)
-    right = right / np.sqrt(right.dot(right))
+    right = right / np.sqrt(right.dot(right)) * -1
     # did not transpose this matrix, even though the matlab code did
     rotMat = np.array([right, down, forward])
 
