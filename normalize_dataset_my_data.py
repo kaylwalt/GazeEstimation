@@ -88,10 +88,10 @@ def normalize_data(faceModel, cameraMatrix, headpose_hr, headpose_ht, gaze_targe
     faceModel = np.add(faceModel, np.array([headpose_ht]).T)
 
     if face_center is None:
-        print(faceModel)
-        print(faceModel.shape)
+        #print(faceModel)
+        #print(faceModel.shape)
         face_center = faceModel.mean(axis=1)
-        print("face center: ", face_center)
+        #print("face center: ", face_center)
 
     norm_img, gaze, cnvMat = normalize_Image(image, face_center, headpose_hR, gaze_target, [448, 448], cameraMatrix)
 
@@ -127,9 +127,9 @@ def normalize_Image(inputImg, target_3D, hR, gc, roiSize, cameraMatrix):
 
     img_warped = cv2.warpPerspective(inputImg, warpMat, tuple(roiSize))
 
-    # img_yuv = cv2.cvtColor(img_warped, cv2.COLOR_RGB2YUV)
-    # img_yuv[:,:,0] = cv2.equalizeHist(img_yuv[:,:,0])
-    # img_warped = cv2.cvtColor(img_yuv, cv2.COLOR_YUV2RGB)
+    img_yuv = cv2.cvtColor(img_warped, cv2.COLOR_RGB2YUV)
+    img_yuv[:,:,0] = cv2.equalizeHist(img_yuv[:,:,0])
+    img_warped = cv2.cvtColor(img_yuv, cv2.COLOR_YUV2RGB)
 
     # normalizing gaze vector
     cnvMat = np.matmul(scaleMat, rotMat)
