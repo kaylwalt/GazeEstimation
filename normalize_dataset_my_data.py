@@ -95,7 +95,7 @@ def normalize_data(faceModel, cameraMatrix, headpose_hr, headpose_ht, gaze_targe
 
     norm_img, gaze, cnvMat = normalize_Image(image, face_center, headpose_hR, gaze_target, [448, 448], cameraMatrix)
 
-    return norm_img, t(gaze / np.sqrt(gaze.dot(gaze))), cnvMat
+    return norm_img, t(gaze / np.sqrt(gaze.dot(gaze))), cnvMat, face_center
 
 
 def normalize_Image(inputImg, target_3D, hR, gc, roiSize, cameraMatrix):
