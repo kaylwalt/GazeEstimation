@@ -98,13 +98,14 @@ def predict_gaze(fast_predictor, cap, face_detector, face_predictor, camera_matr
     # print("predictions in radians: ", predictions[0]['angles'])
     # print("predictions in degrees: ", list(np.rad2deg(predictions[0]['angles'])))
     #
-    # while(True):
-    #     cv2.imshow('before', frame)
-    #     cv2.imshow('img1', normalized_image)
-    #     if cv2.waitKey(1) & 0xFF == ord('y'):
-    #         cv2.imwrite('c1.png', frame)
-    #         cv2.destroyAllWindows()
-    #         break
+    if __name__ == "__main__":
+        while(True):
+            cv2.imshow('before', frame)
+            cv2.imshow('img1', normalized_image)
+            if cv2.waitKey(1) & 0xFF == ord('y'):
+                cv2.imwrite('c1.png', frame)
+                cv2.destroyAllWindows()
+                break
 
     #returning a vector going from the center of the face to the unit vector translated from the
     #normalized image space back to normal camera space
