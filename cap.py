@@ -9,7 +9,7 @@ from normalize_dataset_my_data import normalize_data
 import tensorflow as tf
 from tensorflow.contrib import predictor
 from helper_fun import trev, angle_dist, LinePlaneCollision
-from medium_face import cnn_model_fn
+from medium_face_no_dropout import cnn_model_fn
 from numpy.linalg import inv
 
 class FastPredict:
@@ -116,7 +116,7 @@ def predict_gaze(fast_predictor, cap, face_detector, face_predictor, camera_matr
 
 
 def main():
-    model_dir = "../model_medium/"
+    model_dir = "../model_medium_no_dropout_short_train/"
     # Create the Estimator
     # run_config = tf.estimator.RunConfig().replace(
     #   session_config=tf.ConfigProto(device_count={'GPU': 0}))
