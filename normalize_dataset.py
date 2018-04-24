@@ -24,12 +24,12 @@ def normalize_data_set():
             for num, line in enumerate(ann.readlines()):
                 line_array = line.split(' ')
 
-                headpose_hr = np.array(line_array[15:18], dtype="float64")
-                headpose_ht = np.array(line_array[18:21], dtype="float64")
+                headpose_hr = np.array(line_array[15:18], dtype="float32")
+                headpose_ht = np.array(line_array[18:21], dtype="float32")
 
-                face_center = np.array(line_array[21:24], dtype='float64')
+                face_center = np.array(line_array[21:24], dtype='float32')
 
-                gaze_target = np.array(line_array[24:27], dtype='float64')
+                gaze_target = np.array(line_array[24:27], dtype='float32')
 
                 cameraMatrix= scipy.io.loadmat(data_folder + "/p0{}/Calibration/Camera.mat".format(i))['cameraMatrix']
 
@@ -55,12 +55,12 @@ def normalize_data_set():
             for num, line in enumerate(ann.readlines()):
                 line_array = line.split(' ')
 
-                headpose_hr = np.array(line_array[15:18], dtype="float64")
-                headpose_ht = np.array(line_array[18:21], dtype="float64")
+                headpose_hr = np.array(line_array[15:18], dtype="float32")
+                headpose_ht = np.array(line_array[18:21], dtype="float32")
 
-                face_center = np.array(line_array[21:24], dtype='float64')
+                face_center = np.array(line_array[21:24], dtype='float32')
 
-                gaze_target = np.array(line_array[24:27], dtype='float64')
+                gaze_target = np.array(line_array[24:27], dtype='float32')
 
                 cameraMatrix= scipy.io.loadmat(data_folder + "/p1{}/Calibration/Camera.mat".format(i))['cameraMatrix']
 
@@ -72,7 +72,7 @@ def normalize_data_set():
                 labels.append(polar)
 
             np_data = np.array(data, dtype="uint8")
-            np_labels = np.array(labels, dtype="float64")
+            np_labels = np.array(labels, dtype="float32")
             print("data shape: ", np_data.shape)
             print("label shape: ", np_labels.shape)
             np.save(norm_folder + "/p1{}_data.npy".format(i), np_data)
