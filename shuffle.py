@@ -5,7 +5,7 @@ import scipy.io
 import cv2
 import random
 
-data_folder = "../MPIIFaceGaze_kayl_norm"
+data_folder = "../MPIIFaceGaze_kayl_norm_leave_one"
 
 
 def unison_shuffled_copies(a, b):
@@ -14,7 +14,7 @@ def unison_shuffled_copies(a, b):
     return a[p], b[p]
 
 
-for j in range(0,10):
+for j in range(2,10):
     print("the random index this time is ", j)
     if j < 10:
         shufp = data_folder + "/p0{}_data.npy".format(j)
@@ -29,7 +29,7 @@ for j in range(0,10):
         shuffler_data = np.load(shufp)
         shuffler_labels = np.load(shufl)
 
-    for i in range(0,15):
+    for i in range(2,15):
 
         if i == j:
             continue

@@ -7,8 +7,8 @@ import tensorflow as tf
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
-model_directory = "../model_medium_no_dropout"
-summary_directory = "../summary_medium_no_dropout"
+model_directory = "../model_medium_no_dropout_leave"
+summary_directory = "../summary_medium_no_dropout_leave"
 def cnn_model_fn(features, labels, mode):
   """Model function for CNN."""
   # Input Layer
@@ -144,14 +144,14 @@ def main(unused_argv):
       model_fn=cnn_model_fn, model_dir=model_directory)
 
   # Load training and eval data
-  data_folder = "../MPIIFaceGaze_kayl_norm"
+  data_folder = "../MPIIFaceGaze_kayl_norm_leave_one"
 
   epoch_count = 100
   for x in range(0,epoch_count):
       print(" ")
       print("Epoch number: ", x)
       print(" ")
-      for i in range(0,15):
+      for i in range(2,15):
           if i < 10:
               pathp = data_folder + "/p0{}_data.npy".format(i)
               pathl = data_folder + "/p0{}_labels.npy".format(i)
