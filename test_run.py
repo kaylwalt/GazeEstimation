@@ -9,12 +9,17 @@ import numpy as np
 import tensorflow as tf
 from helper_fun import *
 
-csvFile = "eyeposition.csv"
-if not os.path.isfile(csvFile):
-    print("making new csv file")
-    with open(csvFile, 'w') as f:
-        writer = csv.writer(f)
-        writer.writerow(['xpixel', 'ypixel', 'xestimate', 'yestimate', 'time'])
+
+for i in range(0, 100):
+    if not os.path.isfile("data/eyeposition_{}.csv".format(i)):
+        csvFile = "data/eyeposition_{}.csv".format(i)
+        print("making new csv file")
+        with open(csvFile, 'w') as f:
+            writer = csv.writer(f)
+            writer.writerow(['xpixel', 'ypixel', 'xestimate', 'yestimate', 'time'])
+        break
+    else:
+        print("data/eyeposition_{}.csv".format(i) + " was taken")
 
 red = (255, 0, 0)
 blue = (0, 0, 255)
@@ -23,7 +28,7 @@ black = (0, 0, 0)
 white = (255, 255, 255)
 
 def calibrate():
-    model_dir = "../model_medium/"
+    model_dir = "../model_medium_no_dropout_short_train/"
     # Create the Estimator
     # run_config = tf.estimator.RunConfig().replace(
     #   session_config=tf.ConfigProto(device_count={'GPU': 0}))
@@ -69,6 +74,7 @@ def calibrate():
     #rr += [screen_prompt_cal(display, current_point, myfont, white)]
     running = True
     since_last_frame = 0
+    sample_count = 0
     while running:
         for e in pg.event.get():
             if e.type is pg.QUIT:
@@ -81,7 +87,9 @@ def calibrate():
                         #vec is the vector in camera space pointing from face center to the gaze point
                         cam_dir_vec, face_Center = predict_gaze(fast, cap, detector, dlib_predictor, camera_matrix, dist_coeff, face_model)
                         p = LinePlaneCollision(np.array([0, 0, 1]), np.array([0,0,0]), cam_dir_vec, face_Center)
-                        rr += [write_message(display, "---------------" + str(p) + "---------------", myfont, white)]
+                        sample_count += 1
+                        write_eye_position(csvFile, [0,0,p[0],p[1], datetime.datetime.now()])
+                        rr += [write_message(display, "---------------" + "Sample count number {}".format(sample_count) + "---------------", myfont, white)]
                     except:
                         rr += [write_message(display, "------------- couldnt get your face -------------", myfont, white)]
         #update as close to 60 fps as possible
