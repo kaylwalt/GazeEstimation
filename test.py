@@ -47,7 +47,7 @@ def main(unused_argv):
 
   # Create the Estimator
   run_config = tf.estimator.RunConfig().replace(
-    session_config=tf.ConfigProto(device_count={'GPU': 1}))
+    session_config=tf.ConfigProto(device_count={'GPU': 0}))
 
   classifier = tf.estimator.Estimator(
       model_fn=cnn_model_fn, model_dir="../model_medium", config=run_config)
@@ -64,19 +64,18 @@ def main(unused_argv):
   # print(eval_results)
 
   final = time.clock()
-  num_entries = 1000
+  num_entries = 10
   for i in range(num_entries):
     start = time.clock()
     pred_input_fn = tf.estimator.inputs.numpy_input_fn(
         x={"x": eval_data[i:i+1]},
         num_epochs=1,
         shuffle=False)
-    #print(tuple(eval_data[i:i+1]))
     #pred_results = classifier.predict(input_fn=pred_input_fn)
     pred_results = fp.predict({"x": eval_data[i:i+1]})
     #print("time taken for {}: ".format(i), time.clock() - start)
-    #print("eval labels: ", eval_labels[i:i+1])
-    #print("predictions: ", list(pred_results))
+    print("eval labels: ", eval_labels[i:i+1])
+    print("predictions: ", list(pred_results))
   total_time = time.clock() - final
   print("total time taken: ", total_time)
   print("predictions per second: ", num_entries / total_time)
