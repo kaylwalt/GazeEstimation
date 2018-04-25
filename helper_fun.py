@@ -17,6 +17,9 @@ def trev(angles):
 
     return answer
 
+def cam_unit_to_cm(units):
+    return (4.0/30.0) * units
+
 def angle_dist(u1, u2):
     return np.arccos(u1.dot(u2))
 
