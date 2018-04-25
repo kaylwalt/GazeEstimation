@@ -3,8 +3,6 @@ import numpy as np
 from medium_face import cnn_model_fn
 import time
 
-
-
 class FastPredict:
     def _createGenerator(self):
         while not self.closed:
