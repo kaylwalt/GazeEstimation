@@ -1,8 +1,12 @@
+#Based off of code from [1], https://github.com/marcsto/rl/blob/master/src/fast_predict.py, just modified for
+#the new tensorflow api, which takes a Dataset.from_generator instead of a straight python generator
+#
 import tensorflow as tf
 import numpy as np
 from medium_face import cnn_model_fn
 import time
 
+# start of code from [1]
 class FastPredict:
     def _createGenerator(self):
         while not self.closed:
@@ -32,6 +36,8 @@ class FastPredict:
         self.closed=True
         next(self.predictions)
 
+#end of code from [1]
+
 def main(unused_argv):
   # Load training and eval data
 
@@ -41,26 +47,15 @@ def main(unused_argv):
 
   eval_labels = np.load(data_folder + "/p00_labels.npy").astype("float32")
 
-  # eval_data = eval_data[100:101, :, :, :]
-  # eval_labels = eval_labels[100:101,:]
-
   # Create the Estimator
   run_config = tf.estimator.RunConfig().replace(
     session_config=tf.ConfigProto(device_count={'GPU': 1}))
   print("making the classifier")
   classifier = tf.estimator.Estimator(
-      model_fn=cnn_model_fn, model_dir="../model_medium", config=run_config)
+      model_fn=cnn_model_fn, model_dir="../model_medium_leave_2", config=run_config)
 
   fp = FastPredict(classifier)
-  # Evaluate the model and print results
-  # eval_input_fn = tf.estimator.inputs.numpy_input_fn(
-  #     x={"x": eval_data},
-  #     y=eval_labels,
-  #     num_epochs=1,
-  #     shuffle=False)
 
-  # eval_results = classifier.evaluate(input_fn=eval_input_fn)
-  # print(eval_results)
 
   final = time.clock()
   num_entries = 10
@@ -70,9 +65,8 @@ def main(unused_argv):
         x={"x": eval_data[i:i+1]},
         num_epochs=1,
         shuffle=False)
-    #pred_results = classifier.predict(input_fn=pred_input_fn)
+
     pred_results = fp.predict({"x": eval_data[i:i+1]})
-    #print("time taken for {}: ".format(i), time.clock() - start)
     print("eval labels: ", eval_labels[i:i+1])
     print("predictions: ", list(pred_results))
   total_time = time.clock() - final

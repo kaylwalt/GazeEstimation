@@ -1,3 +1,6 @@
+#Uses code from [1], https://gist.github.com/TimSC/8c25ca941d614bf48ebba6b473747d72
+#
+#
 import math
 import numpy as np
 
@@ -26,6 +29,7 @@ def t(vec):
 
     return [theta, phi]
 
+#start of code from [1]
 def LinePlaneCollision(planeNormal, planePoint, rayDirection, rayPoint, epsilon=1e-6):
     ndotu = planeNormal.dot(rayDirection)
     if abs(ndotu) < epsilon:
@@ -35,3 +39,4 @@ def LinePlaneCollision(planeNormal, planePoint, rayDirection, rayPoint, epsilon=
     si = -planeNormal.dot(w) / ndotu
     Psi = w + si * rayDirection + planePoint
     return Psi
+#end of code from [1]

@@ -1,3 +1,6 @@
+#This code is logically equivalent to normalization code from https://www.mpi-inf.mpg.de/departments/computer-vision-and-multimodal-computing/research/gaze-based-human-computer-interaction/appearance-based-gaze-estimation-in-the-wild/
+# translated to python
+#
 import os
 import numpy as np
 import cv2

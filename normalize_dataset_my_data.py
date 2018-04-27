@@ -1,3 +1,6 @@
+#This code is logically equivalent to normalization code from https://www.mpi-inf.mpg.de/departments/computer-vision-and-multimodal-computing/research/gaze-based-human-computer-interaction/appearance-based-gaze-estimation-in-the-wild/
+# translated to python
+#
 import os
 import numpy as np
 import cv2
@@ -5,78 +8,6 @@ import scipy.io
 from numpy.linalg import inv
 import math
 
-def normalize_data_set():
-    data_folder = "../MPIIFaceGaze"
-    norm_folder = "../MPIIFaceGaze_kayl_norm"
-    if os.path.isdir(norm_folder):
-        print("using norm folder")
-    else:
-        print("making folder: ", norm_folder)
-        os.makedirs(norm_folder)
-
-    faceModel = np.load("face_model.npy")
-    for i in range(0,10):
-        anno_path = data_folder + "/p0{}/p0{}.txt".format(i, i)
-        print(anno_path)
-        data = []
-        labels = []
-        with open(anno_path, 'r') as ann:
-            for num, line in enumerate(ann.readlines()):
-                line_array = line.split(' ')
-
-                headpose_hr = np.array(line_array[15:18], dtype="float64")
-                headpose_ht = np.array(line_array[18:21], dtype="float64")
-
-                face_center = np.array(line_array[21:24], dtype='float64')
-
-                gaze_target = np.array(line_array[24:27], dtype='float64')
-
-                cameraMatrix= scipy.io.loadmat(data_folder + "/p0{}/Calibration/Camera.mat".format(i))['cameraMatrix']
-
-                image = cv2.imread(data_folder + "/p0{}/".format(i) + line_array[0], cv2.IMREAD_COLOR)
-                if image is None:
-                    print("the image path is wrong")
-                norm_img, polar = normalize_data(faceModel, cameraMatrix, headpose_hr, headpose_ht, gaze_target, face_center, image)
-                data.append(norm_img)
-                labels.append(polar)
-            np_data = np.array(data, dtype="uint8")
-            np_labels = np.array(labels, dtype="float64")
-            print("data shape: ", np_data.shape)
-            print("label shape: ", np_labels.shape)
-            np.save(norm_folder + "/p0{}_data.npy".format(i), np_data)
-            np.save(norm_folder + "/p0{}_labels.npy".format(i), np_labels)
-
-    for i in range(0,5):
-        anno_path = data_folder + "/p1{}/p1{}.txt".format(i, i)
-        print(anno_path)
-        data = []
-        labels = []
-        with open(anno_path, 'r') as ann:
-            for num, line in enumerate(ann.readlines()):
-                line_array = line.split(' ')
-
-                headpose_hr = np.array(line_array[15:18], dtype="float64")
-                headpose_ht = np.array(line_array[18:21], dtype="float64")
-
-                face_center = np.array(line_array[21:24], dtype='float64')
-
-                gaze_target = np.array(line_array[24:27], dtype='float64')
-
-                cameraMatrix= scipy.io.loadmat(data_folder + "/p1{}/Calibration/Camera.mat".format(i))['cameraMatrix']
-
-                image = cv2.imread(data_folder + "/p1{}/".format(i) + line_array[0], cv2.IMREAD_COLOR)
-                if image is None:
-                    print("the image path is wrong")
-                norm_img, polar = normalize_data(faceModel, cameraMatrix, headpose_hr, headpose_ht, gaze_target, face_center, image)
-                data.append(norm_img)
-                labels.append(polar)
-
-            np_data = np.array(data, dtype="uint8")
-            np_labels = np.array(labels, dtype="float64")
-            print("data shape: ", np_data.shape)
-            print("label shape: ", np_labels.shape)
-            np.save(norm_folder + "/p1{}_data.npy".format(i), np_data)
-            np.save(norm_folder + "/p1{}_labels.npy".format(i), np_labels)
 
 
 
@@ -144,6 +75,3 @@ def t(vec):
     phi = math.atan2(-vec[0], -vec[2])
 
     return [theta, phi]
-
-if __name__ == "__main__":
-    normalize_data_set()

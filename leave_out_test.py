@@ -1,11 +1,11 @@
+#This is original and ran on the data 3 times, with 2 people chosen to be left out, the network was retrained each time
+#after randomly renaming the participant numpy data arrays, and then tested with this program
+#
 import tensorflow as tf
 import numpy as np
 from medium_face import cnn_model_fn
 import time
 from helper_fun import angle_dist, trev
-
-
-
 
 def main(unused_argv):
   # Load training and eval data
@@ -26,20 +26,6 @@ def main(unused_argv):
 
   test_data = np.concatenate((eval_data, eval_data2))
   test_labels =np.concatenate((eval_labels, eval_labels2))
-  print(test_data.shape)
-  print(test_labels.shape)
-  # Create the Estimator
-
-
-  # # Evaluate the model and print results
-  # eval_input_fn = tf.estimator.inputs.numpy_input_fn(
-  #     x={"x": eval_data},
-  #     y=eval_labels,
-  #     num_epochs=1,
-  #     shuffle=False)
-
-  # eval_results = classifier.evaluate(input_fn=eval_input_fn)
-  # print(eval_results)
 
   pred_input_fn = tf.estimator.inputs.numpy_input_fn(
       x={"x": test_data},

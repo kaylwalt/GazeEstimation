@@ -1,3 +1,6 @@
+#This neural network is based off of the model from https://www.mpi-inf.mpg.de/departments/computer-vision-and-multimodal-computing/research/gaze-based-human-computer-interaction/its-written-all-over-your-face-full-face-appearance-based-gaze-estimation/
+#and trained on their dataset available at the above link
+#
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function

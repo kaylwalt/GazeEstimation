@@ -1,3 +1,6 @@
+# Uses code from [1] https://stackoverflow.com/questions/4601373/better-way-to-shuffle-two-numpy-arrays-in-unison?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+#
+#
 import os
 import numpy as np
 import time
@@ -7,12 +10,12 @@ import random
 
 data_folder = "../MPIIFaceGaze_kayl_norm_leave_one"
 
-
+# Start of code from [1], reference at top
 def unison_shuffled_copies(a, b):
     assert len(a) == len(b)
     p = np.random.permutation(len(a))
     return a[p], b[p]
-
+# end of code from [1]
 
 for j in range(2,10):
     print("the random index this time is ", j)

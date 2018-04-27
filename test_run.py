@@ -1,3 +1,6 @@
+#landmark detection implementation from https://www.pyimagesearch.com/2017/04/03/facial-landmarks-dlib-opencv-python/
+#
+#
 import pygame as pg
 import math
 import csv
@@ -27,7 +30,7 @@ magenta = (255, 0, 255)
 black = (0, 0, 0)
 white = (255, 255, 255)
 
-def calibrate():
+def main():
     model_dir = "../model_medium_no_dropout_short_train/"
     # Create the Estimator
     # run_config = tf.estimator.RunConfig().replace(
@@ -66,7 +69,6 @@ def calibrate():
     clock = pg.time.Clock()
     display = pg.display.set_mode((0,0), pg.FULLSCREEN)
     rr += [display.fill(bc)]
-    #rr += [write_message(display, "We are going to calibrate your screen location", myfont, white)]
     test_data = []
     test_points = [(0,0), (display.get_width(), 0), (0, display.get_height()), (display.get_width(), display.get_height())] * 3
     current_point = testPoint(test_points[0])
@@ -210,5 +212,4 @@ def randomPoint(surface):
     return testPoint((randint(0, width-1), randint(0, height-1)), 20, 3)
 
 if __name__ == "__main__":
-    #main()
-    calibrate()
+    main()
