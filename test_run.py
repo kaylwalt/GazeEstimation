@@ -5,6 +5,7 @@ import pygame as pg
 import math
 import csv
 import os
+import sys
 import datetime
 from random import *
 from cap import *
@@ -19,7 +20,7 @@ for i in range(0, 100):
         print("making new csv file")
         with open(csvFile, 'w') as f:
             writer = csv.writer(f)
-            writer.writerow(['xpixel', 'ypixel', 'xestimate', 'yestimate', 'time'])
+            writer.writerow(['xpixel', 'ypixel', 'xestimate', 'yestimate', 'angleError', 'time'])
         break
     else:
         print("data/eyeposition_{}.csv".format(i) + " was taken")
@@ -77,6 +78,10 @@ def main():
     running = True
     since_last_frame = 0
     sample_count = 0
+    angle_errors = []
+    face_centers = []
+    #Distance away in CM
+    face_distance = 40
     while running:
         for e in pg.event.get():
             if e.type is pg.QUIT:
@@ -90,9 +95,18 @@ def main():
                         cam_dir_vec, face_Center = predict_gaze(fast, cap, detector, dlib_predictor, camera_matrix, dist_coeff, face_model)
                         p = LinePlaneCollision(np.array([0, 0, 1]), np.array([0,0,0]), cam_dir_vec, face_Center)
                         sample_count += 1
-                        write_eye_position(csvFile, [0,0,p[0],p[1], datetime.datetime.now()])
-                        rr += [write_message(display, "---------------" + "Sample count number {}".format(sample_count) + "---------------", myfont, white)]
+
+                        face_center_distance = np.sqrt(face_Center.dot(face_Center))
+                        face_centers.append(face_center_distance)
+                        face_to_cam = np.subtract(np.array([0,0,0]), face_Center)
+                        face_to_cam = face_to_cam / np.sqrt(face_to_cam.dot(face_to_cam))
+                        err = angle_dist(face_to_cam, cam_dir_vec)
+                        angle_errors.append(err)
+                        write_eye_position(csvFile, [0,0,p[0],p[1], np.rad2deg(err), datetime.datetime.now()])
+                        rr += [write_message(display,
+                        "---------------" + "Sample: {}, point: {}, deg error: {}".format(sample_count, p, np.rad2deg(err)) + "---------------", myfont, white)]
                     except:
+                        print("Unexpected error: ", sys.exc_info()[0])
                         rr += [write_message(display, "------------- couldnt get your face -------------", myfont, white)]
         #update as close to 60 fps as possible
         since_last_frame += clock.tick()
@@ -104,6 +118,12 @@ def main():
         since_last_frame = 0
     pg.quit()
     print(test_data)
+    angle_errors = np.rad2deg(angle_errors)
+    print("Angle error average: ", np.mean(angle_errors))
+    print(angle_errors)
+    average_face_d = np.mean(face_centers)
+    print(face_centers)
+    print("average face distance: ", average_face_d)
 
 
 def write_eye_position(filename, data):
