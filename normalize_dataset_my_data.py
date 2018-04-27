@@ -1,6 +1,6 @@
 #This code is logically equivalent to normalization code from https://www.mpi-inf.mpg.de/departments/computer-vision-and-multimodal-computing/research/gaze-based-human-computer-interaction/appearance-based-gaze-estimation-in-the-wild/
 # translated to python
-#
+#flipped some negatives to work with output of opencv solvepnp
 import os
 import numpy as np
 import cv2

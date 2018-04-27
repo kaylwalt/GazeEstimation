@@ -1,4 +1,5 @@
-#This is original and ran on the data 3 times, with 2 people chosen to be left out, the network was retrained each time
+#This is original
+#ran on the data 3 times, with 2 people chosen to be left out, the network was retrained each time
 #after randomly renaming the participant numpy data arrays, and then tested with this program
 #
 import tensorflow as tf
